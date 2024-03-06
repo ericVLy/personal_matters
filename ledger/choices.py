@@ -1,5 +1,5 @@
 transaction_category_choices = (
-    ('Cultural Leisure ',' 文化休闲'),
+    ('Cultural Leisure ','文化休闲'),
     ('Investment and Wealth Management ','投资理财'),
     ('Catering Cuisine ','餐饮美食'),
     ('Recharge Payment ','充值缴费'),

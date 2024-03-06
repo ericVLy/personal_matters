@@ -1,0 +1,116 @@
+{% extends "wagtailadmin/base.html" %}
+{% load static %}
+{% load i18n wagtailadmin_tags %}
+{% block titletag %}{% blocktrans trimmed with snippet_type_name=model_opts.verbose_name %}New  {{ snippet_type_name }}{% endblocktrans %}{% endblock %}
+{% block content %}
+    {% include 'wagtailadmin/shared/headers/slim_header.html' %}
+
+    {% trans "New" as new_str %}
+    {% include "wagtailadmin/shared/header.html" with title=new_str subtitle=model_opts.verbose_name icon=header_icon merged=1 only %}
+<div>
+    <button type="button" class="button action-save button-primary" data-toggle="modal" data-target="#exampleModal">add multiple</button>
+    <button type="button" class="button action-save button-primary" id="id_csv_template_button">get csv template</button>
+    <p></p>
+</div>
+
+<div class="" id="id_loader">
+  <div class="side"></div>
+  <div class="side"></div>
+  <div class="side"></div>
+  <div class="side"></div>
+  <div class="side"></div>
+  <div class="side"></div>
+  <div class="side"></div>
+  <div class="side"></div>
+</div>
+
+    <form id="id_create_ledger_form" action="{{ action_url }}" method="POST" novalidate{% if form.is_multipart %} enctype="multipart/form-data"{% endif %} data-edit-form>
+        {% csrf_token %}
+
+        <div class="nice-padding">
+            {{ panel.render_form_content }}
+        </div>
+
+        <footer class="footer">
+            <nav aria-label="{% trans 'Actions' %}">
+                <ul>
+                    <li class="actions actions--primary footer__container">
+                        <div class="dropdown dropup dropdown-button match-width">
+                            {{ action_menu.render_html }}
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        </footer>
+    </form>
+      
+      <!-- Modal -->
+      <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h2 class="modal-title" id="exampleModalLabel">Import Multiple</h2>
+            </div>
+            <div class="modal-body">
+              <div id="check_each_entry_div">
+                <label for="check_each_entry">
+                  check each entry:
+                  <input id="check_each_entry" class="form-check-input mt-0" type="checkbox" checked="checked" aria-label="Checkbox for following text input">
+                </label>
+              </div>
+
+              <div id="file_encoding_div">
+                <label for="file_encoding">file encoding: </label>
+                <input style="width: min-content;" type="text" id="file_encoding" placeholder="file encoding" value="utf-8">
+              </div>
+              <div id="load_csv_input_div">
+                <label for="csvFileInput" class="file-input">
+                  Load CSV
+                  <input id="csvFileInput" type="file" accept=".csv">
+                </label>
+              </div>
+              <div id="csv_load_table_div">
+                <table id="csv_load_table"></table>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="button button-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="button button-primary" id="id_multipate_ledger_confirm_button">Confirm</button>
+            </div>
+          </div>
+        </div>
+      </div>
+{% endblock %}
+
+{% block extra_css %}
+    {{ block.super }}
+    {{ media.css }}
+
+    <link rel="stylesheet" href="{% static 'css/loader_side.css' %}">
+    <link rel="stylesheet" href="{% static 'css/create_input_file.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'node_modules/bootstrap/dist/css/bootstrap.css' %}"> -->
+    <link rel="stylesheet" href="{% static 'node_modules/bootstrap-table/dist/bootstrap-table.min.css' %}">
+{% endblock %}
+{% block extra_js %}
+    {{ block.super }}
+    {% include "wagtailadmin/pages/_editor_js.html" %}
+    {{ media.js }}
+
+    <script>
+        // Set wagtailConfig.ACTIVE_CONTENT_LOCALE if this is a translated page
+        // This value may be used by JS widgets on the form
+        {% if locale %}
+            window.wagtailConfig = window.wagtailConfig || {};
+            window.wagtailConfig.ACTIVE_CONTENT_LOCALE = '{{ locale.language_code|escapejs }}';
+        {% endif %}
+    </script>
+
+    <script src="{% static 'js/create_csv_transform.js' %}"></script>
+    <!-- <script src="{% static 'node_modules/bootstrap-table/dist/bootstrap-table.min.js' %}"></script>
+    <script src="{% static 'node_modules/bootstrap/dist/bootstrap.min.js' %}"></script>
+    <script src="{% static 'node_modules/bootstrap-modal/index.js' %}"></script> -->
+
+{% endblock %}

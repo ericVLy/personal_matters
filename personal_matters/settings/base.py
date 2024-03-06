@@ -25,6 +25,7 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 
 INSTALLED_APPS = [
     'ledger',
+    "node_dependency_checker",
     "home",
     "search",
     "wagtail.contrib.forms",
