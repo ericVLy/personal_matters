@@ -13,7 +13,7 @@
     <p></p>
 </div>
 
-<div class="" id="id_loader">
+<div class="" id="load_parent"><div class="" id="id_loader">
   <div class="side"></div>
   <div class="side"></div>
   <div class="side"></div>
@@ -22,7 +22,8 @@
   <div class="side"></div>
   <div class="side"></div>
   <div class="side"></div>
-</div>
+</div></div>
+
 
     <form id="id_create_ledger_form" action="{{ action_url }}" method="POST" novalidate{% if form.is_multipart %} enctype="multipart/form-data"{% endif %} data-edit-form>
         {% csrf_token %}

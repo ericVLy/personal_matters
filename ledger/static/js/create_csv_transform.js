@@ -20,8 +20,10 @@ include("/static/node_modules/bootstrap-table/dist/bootstrap-table.min.js")
 // import jquery from "../../../personal_matters/static/node_modules/jquery/dist/jquery.js"
 
 var global_csv = null;
-
+var global_multipate_add_ajax_num = 0;
 var csv_encoding = 'utf-8';
+var ajaxQueue = $({});
+
 
 window.onload=function(){
     let ignore_column = ["csrfmiddlewaretoken", "go_live_at", "expire_at"]
@@ -85,7 +87,7 @@ window.onload=function(){
                     for (const j in select_field) {
                         if (Object.hasOwnProperty.call(select_field, j)) {
                             const element = select_field[j];
-                            console.log(data[i][element])
+                            // console.log(data[i][element])
                             data[i][element] = get_select_value_option_text("id_"+element, data[i][element])
                         }
                     }
@@ -134,8 +136,8 @@ window.onload=function(){
 
     //confirm_button
     document.getElementById("id_multipate_ledger_confirm_button").addEventListener("click", function () {
-        document.getElementById("id_loader").setAttribute("class", "loader")
         const data = $('#csv_load_table').bootstrapTable("getData",{useCurrentPage:false,includeHiddenRows:true})
+        var ajaxQueue = $({});
         data.forEach(entry => {
             const ignore_column = ["go_live_at", "expire_at"]
             // const XHR = new XMLHttpRequest();
@@ -171,21 +173,32 @@ window.onload=function(){
                                         return acc;
                                     }, {});
             const data_submit = Object.keys(formDataObject).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(formDataObject[key])).join('&');
-            console.log(data_submit)
+            // console.log(data_submit)
             // XHR.open(ledger_form.method, ledger_form.action);
             // XHR.send(data)
-            $.ajax({
-                type:ledger_form.method,
-                url:ledger_form.action,
-                data: data_submit,
-                dataType: 'application/x-www-form-urlencoded',
-                success: function(response) {
-                    console.log(response);
-                  },
-            })
-        });
 
-        alert("multipate job finished")
+            // $.ajax({
+            //     type:ledger_form.method,
+            //     url:ledger_form.action,
+            //     data: data_submit,
+            //     dataType: 'application/x-www-form-urlencoded',
+            //     beforeSend: function(xhr) {
+            //         global_multipate_add_ajax_num += 1;
+            //       },
+            //     success: function(response) {
+            //         console.log(response);
+            //         global_multipate_add_ajax_num -= 1;
+            //       },
+            // })
+            queueAjaxRequest(ledger_form.method, ledger_form.action, data_submit, 'application/x-www-form-urlencoded')
+        });
+        confirm("please do not flush or close the page")
+        ajaxQueue.dequeue();
+        // $.when(ajaxQueue).done(function () {
+        //     document.getElementById("id_loader").setAttribute("class", "")
+        //     alert("multipate job finished")
+        // })
+
     })
 
 };
@@ -213,7 +226,7 @@ function get_select_value_option_text(select_id, option_text) {
     for (var i = 0; i < options.length; i++) {
         var optionValue = options[i].value; // 获取每个选项的值
         var optionText = options[i].text; // 获取每个选项的文本内容
-        console.log("值：" + optionValue + "，文本：" + optionText);
+        // console.log("值：" + optionValue + "，文本：" + optionText);
         if (option_text == optionText) {
             return optionValue
         }
@@ -231,3 +244,31 @@ function formatTime(input) {
   
     return `${year}-${month}-${day} ${hours}:${minutes}`;
   }
+
+
+  function queueAjaxRequest(type, url, data, dataType) {
+    ajaxQueue.queue(function(next) {
+        $.ajax({
+            type: type,
+            url: url,
+            data: data,
+            // async: false,
+            dataType: dataType,
+            beforeSend: function(xhr) {
+                document.getElementById("load_parent").setAttribute("class", "loading-overlay");
+                document.getElementById("id_loader").setAttribute("class", "loader");
+                global_multipate_add_ajax_num += 1;
+              },
+            success: function(data) {
+                // 请求成功后执行的操作
+                console.log('AJAX request to ' + url + ' completed');
+            },
+            complete: function() {
+                document.getElementById("id_loader").setAttribute("class", "");
+                document.getElementById("load_parent").setAttribute("class", "")
+                // 当前请求完成后，调用 next() 继续下一个请求
+                next();
+            }
+        });
+    });
+}
