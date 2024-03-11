@@ -155,39 +155,45 @@ window.onload=function(){
 
     //confirm_button
     document.getElementById("id_multipate_ledger_confirm_button").addEventListener("click", function () {
-        const data = $('#csv_load_table').bootstrapTable("getData",{useCurrentPage:false,includeHiddenRows:true})
-        var ajaxQueue = $({});
-        data.forEach(entry => {
-            const ignore_column = ["go_live_at", "expire_at"]
-            const ledger_form = document.getElementById("id_create_ledger_form")
-            const ledger_form_data = new FormData(ledger_form)
-            for (const i in ignore_column) {
-                if (Object.hasOwnProperty.call(ignore_column, i)) {
-                    const ignore_field = ignore_column[i];
-                    ledger_form_data.delete(ignore_field)
-                }
-            }
+        const push = confirm("please do not flush or close the page")
+        if (push) {
+                const data = $('#csv_load_table').bootstrapTable("getData",{useCurrentPage:false,includeHiddenRows:true})
+                var ajaxQueue = $({});
+                data.forEach(entry => {
+                    const ignore_column = ["go_live_at", "expire_at"]
+                    const ledger_form = document.getElementById("id_create_ledger_form")
+                    const ledger_form_data = new FormData(ledger_form)
+                    for (const i in ignore_column) {
+                        if (Object.hasOwnProperty.call(ignore_column, i)) {
+                            const ignore_field = ignore_column[i];
+                            ledger_form_data.delete(ignore_field)
+                        }
+                    }
 
-            for (const key in entry) {
-                if (Object.hasOwnProperty.call(entry, key)) {
-                    const element = entry[key];
-                    ledger_form_data.set(key, element)
-                }
-            }
+                    for (const key in entry) {
+                        if (Object.hasOwnProperty.call(entry, key)) {
+                            const element = entry[key];
+                            ledger_form_data.set(key, element)
+                        }
+                    }
 
-            ledger_form_data.append("action-publish", "action-publish")
-            const formDataEntries = Array.from(ledger_form_data.entries());
+                    ledger_form_data.append("action-publish", "action-publish")
+                    const formDataEntries = Array.from(ledger_form_data.entries());
 
-            // 将 FormData 数据转换为对象形式
-            const formDataObject = formDataEntries.reduce((acc, [key, value]) => {
-                                        acc[key] = value;
-                                        return acc;
-                                    }, {});
-            const data_submit = Object.keys(formDataObject).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(formDataObject[key])).join('&');
-            queueAjaxRequest(ledger_form.method, ledger_form.action, data_submit, 'application/x-www-form-urlencoded')
-        });
-        confirm("please do not flush or close the page")
-        ajaxQueue.dequeue();
+                    // 将 FormData 数据转换为对象形式
+                    const formDataObject = formDataEntries.reduce((acc, [key, value]) => {
+                                                acc[key] = value;
+                                                return acc;
+                                            }, {});
+                    const data_submit = Object.keys(formDataObject).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(formDataObject[key])).join('&');
+                    global_multipate_add_ajax_num += 1;
+                    queueAjaxRequest(ledger_form.method, ledger_form.action, data_submit, 'application/x-www-form-urlencoded')
+                });
+                ajaxQueue.dequeue();
+        }else {
+            alert("flush or close the page will cut down upload, not start")
+        }
+
 
     })
 
@@ -247,18 +253,31 @@ function formatTime(input) {
             beforeSend: function(xhr) {
                 document.getElementById("load_parent").setAttribute("class", "loading-overlay");
                 document.getElementById("id_loader").setAttribute("class", "loader");
-                global_multipate_add_ajax_num += 1;
               },
             success: function(data) {
                 // 请求成功后执行的操作
                 console.log('AJAX request to ' + url + ' completed');
             },
-            complete: function() {
-                document.getElementById("id_loader").setAttribute("class", "");
-                document.getElementById("load_parent").setAttribute("class", "")
+            complete: function(XMLrequest, textstatus) {
+                global_multipate_add_ajax_num -= 1;
                 // 当前请求完成后，调用 next() 继续下一个请求
+                if (global_multipate_add_ajax_num == 0) {
+                    document.getElementById("id_loader").setAttribute("class", "");
+                    document.getElementById("load_parent").setAttribute("class", "")
+                    console.log("finished")
+                    alert("finished")
+                    // console.log(textstatus)
+                    // console.log(XMLrequest.status)
+                    // console.log(XMLrequest)
+                    location.href = location.href
+                }
                 next();
             }
         });
     });
+}
+
+
+function queueAjaxRequestComplete(params) {
+    // location.href = 'http://127.0.0.1:8000/admin/snippets/ledger/ledger/'
 }
