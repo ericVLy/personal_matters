@@ -14,7 +14,7 @@ class LedgerSnippetViewSet(SnippetViewSet):
     add_view_class = LedgerSnippetsCreateView
     menu_label = "Ledger"  # ditch this to use verbose_name_plural from model
     icon = "clipboard-list"  # change as required
-    # list_display = ("first_name", "last_name", "job_title", "thumb_image")
+    list_display = ("transaction_category", "amount", "transaction_time", "receipt_payment_method")
     # list_filter = {
     #     "job_title": ["icontains"],
     # }
