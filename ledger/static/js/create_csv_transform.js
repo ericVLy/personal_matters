@@ -30,10 +30,32 @@ window.onload=function(){
     let select_field = ["receipt_disbursement", "transaction_category", "transaction_status"]
     let int_field = ["amount"]
     let date_time_field = ["transaction_time"]
+    let ledger_form = document.getElementById("id_create_ledger_form")
+    let ledger_form_data = new FormData(ledger_form)
+    let form_column = []
+    let form_fields = []
+    for (var pair of ledger_form_data.entries()) {
+        if (ignore_column.indexOf(pair[0]) >= 0) {
+            continue;
+        }
+        form_fields.push(pair[0])
+        form_column.push({
+            field: pair[0],
+            title: pair[0],
+            align: 'center',
+            // formatter: strFormatter,
+        })
+    }
+    $('#csv_load_table').bootstrapTable('destroy').bootstrapTable({
+        columns:[form_column],
+        showFullscreen: true,
+        height: 500,
+    })
 
     // csv load event
-    document.getElementById('csvFileInput').addEventListener('change', async function() {
-        var file = this.files[0];
+    async function csv_handle() {
+        $('#csv_load_table').bootstrapTable("removeAll")
+        var file = document.getElementById('csvFileInput').files[0];
         var reader = new FileReader();
     
         reader.onload = function(e) {
@@ -41,28 +63,6 @@ window.onload=function(){
             const wb = XLSX.read(csvContent, {type: 'string'});
             const ws = wb.Sheets[wb.SheetNames[0]];
             global_csv = ws;
-            // csv_load_table_init
-            let ledger_form = document.getElementById("id_create_ledger_form")
-            let ledger_form_data = new FormData(ledger_form)
-            let form_column = []
-            let form_fields = []
-            for (var pair of ledger_form_data.entries()) {
-                if (ignore_column.indexOf(pair[0]) >= 0) {
-                    continue;
-                }
-                form_fields.push(pair[0])
-                form_column.push({
-                    field: pair[0],
-                    title: pair[0],
-                    align: 'center',
-                    // formatter: strFormatter,
-                })
-            }
-            $('#csv_load_table').bootstrapTable('destroy').bootstrapTable({
-                columns:[form_column],
-                showFullscreen: true,
-                height: 500,
-            })
             let data = XLSX.utils.sheet_to_json(ws, { raw: false });
             if (document.getElementById("check_each_entry").checked) {
                 data.forEach(json_data => {
@@ -74,7 +74,6 @@ window.onload=function(){
                 });   
 
             }
-
             for (const i in data) {
                 if (Object.hasOwnProperty.call(data, i)) {
                     const json_data = data[i];
@@ -102,9 +101,29 @@ window.onload=function(){
             $('#csv_load_table').bootstrapTable('append', data)
         };
     
+        reader.onloadstart = async function (params) {
+            console.log('start');
+        }
+        reader.onloadend = function (params) {
+            console.log('end');
+            document.getElementById("id_loader").setAttribute("class", "");
+            document.getElementById("load_parent").setAttribute("class", "");
+        }
         reader.readAsText(file, csv_encoding);
+        return true;
+    }
 
-    });
+    async function csv_handle_animation(params) {
+        document.getElementById("load_parent").setAttribute("class", "loading-overlay");
+        document.getElementById("id_loader").setAttribute("class", "loader");
+        setTimeout(() => csv_handle(), 20)
+        // csv_handle();
+    }
+    document.getElementById('csvFileInput').addEventListener('change', csv_handle_animation);
+    document.getElementById("label_csvFileInput").addEventListener('click', function name(params) {
+        $('#csv_load_table').bootstrapTable('removeAll')
+        document.getElementById('csvFileInput').value = "";
+    })
 
     // csv encoding input event
     document.getElementById('file_encoding').addEventListener('change', function () {
@@ -140,15 +159,7 @@ window.onload=function(){
         var ajaxQueue = $({});
         data.forEach(entry => {
             const ignore_column = ["go_live_at", "expire_at"]
-            // const XHR = new XMLHttpRequest();
-            // XHR.addEventListener("load", (event) => {
-            //     console.log("send succeed");
-            //   });
-            // XHR.addEventListener("error", (event) => {
-            //     console.log(event);
-            // });
             const ledger_form = document.getElementById("id_create_ledger_form")
-            // const tocken = ledger_form.
             const ledger_form_data = new FormData(ledger_form)
             for (const i in ignore_column) {
                 if (Object.hasOwnProperty.call(ignore_column, i)) {
@@ -173,31 +184,10 @@ window.onload=function(){
                                         return acc;
                                     }, {});
             const data_submit = Object.keys(formDataObject).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(formDataObject[key])).join('&');
-            // console.log(data_submit)
-            // XHR.open(ledger_form.method, ledger_form.action);
-            // XHR.send(data)
-
-            // $.ajax({
-            //     type:ledger_form.method,
-            //     url:ledger_form.action,
-            //     data: data_submit,
-            //     dataType: 'application/x-www-form-urlencoded',
-            //     beforeSend: function(xhr) {
-            //         global_multipate_add_ajax_num += 1;
-            //       },
-            //     success: function(response) {
-            //         console.log(response);
-            //         global_multipate_add_ajax_num -= 1;
-            //       },
-            // })
             queueAjaxRequest(ledger_form.method, ledger_form.action, data_submit, 'application/x-www-form-urlencoded')
         });
         confirm("please do not flush or close the page")
         ajaxQueue.dequeue();
-        // $.when(ajaxQueue).done(function () {
-        //     document.getElementById("id_loader").setAttribute("class", "")
-        //     alert("multipate job finished")
-        // })
 
     })
 
