@@ -14,13 +14,11 @@ EXPOSE 8000
 ENV PYTHONUNBUFFERED=1 \
     PORT=8000
 
-RUN apt-get update --yes --quiet &&  apt-get install --yes --quiet --no-install-recommends curl
-
 # Install system packages required by Wagtail and Django.
-RUN curl -fsSL https://deb.nodesource.com/setup_21.x | bash - &&\
-apt-get install -y nodejs
-
-RUN apt-get install --yes --quiet --no-install-recommends \
+RUN apt-get update --yes --quiet &&  apt-get install --yes --quiet --no-install-recommends curl &&\
+curl -fsSL https://deb.nodesource.com/setup_21.x | bash - &&\
+apt-get install --yes --quiet --no-install-recommends \
+    nodejs\
     build-essential \
     libpq-dev \
     libmariadbclient-dev \
