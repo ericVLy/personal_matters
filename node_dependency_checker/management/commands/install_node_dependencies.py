@@ -15,13 +15,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             # 检查 Node.js 是否可用
-            subprocess.run(['node', '--version'], check=True, shell=True)
-            subprocess.run(['npm', '--version'], check=True, shell=True)
+            subprocess.run(['node', '--version'], check=True)
+            subprocess.run(['npm', '--version'], check=True)
             print('Node.js is installed.')
 
             # 检查并安装 Node.js 依赖
             print(static_path)
-            subprocess.run(['npm', 'install'], check=True, cwd=static_path, shell=True)
+            subprocess.run(['npm', 'install'], check=True, cwd=static_path)
             print('Node.js dependencies installed successfully.')
 
         except FileNotFoundError:

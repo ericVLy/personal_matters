@@ -54,7 +54,7 @@ USER wagtail
 # nodejs
 RUN python manage.py install_node_dependencies
 # Collect static files.
-RUN python manage.py collectstatic --noinput --clear
+# RUN python manage.py collectstatic --noinput --clear
 
 # Runtime command that executes when "docker run" is called, it does the
 # following:
