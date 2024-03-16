@@ -2,7 +2,7 @@
 FROM python:3.8.1-slim-buster
 
 # Add user that will be used in the container.
-RUN useradd wagtail
+RUN useradd wagtail -d /home/wagtail
 
 # Port used by this container to serve HTTP.
 EXPOSE 8000
@@ -14,14 +14,20 @@ EXPOSE 8000
 ENV PYTHONUNBUFFERED=1 \
     PORT=8000
 
+RUN apt-get update --yes --quiet &&  apt-get install --yes --quiet --no-install-recommends curl
+
 # Install system packages required by Wagtail and Django.
-RUN apt-get update --yes --quiet && apt-get install --yes --quiet --no-install-recommends \
+RUN curl -fsSL https://deb.nodesource.com/setup_21.x | bash - &&\
+apt-get install -y nodejs
+
+RUN apt-get install --yes --quiet --no-install-recommends \
     build-essential \
     libpq-dev \
     libmariadbclient-dev \
     libjpeg62-turbo-dev \
     zlib1g-dev \
     libwebp-dev \
+    git \
  && rm -rf /var/lib/apt/lists/*
 
 # Install the application server.
@@ -32,12 +38,12 @@ COPY requirements.txt /
 RUN pip install -r /requirements.txt
 
 # Use /app folder as a directory where the source code is stored.
-WORKDIR /app
+WORKDIR /home/wagtail
 
 # Set this directory to be owned by the "wagtail" user. This Wagtail project
 # uses SQLite, the folder needs to be owned by the user that
 # will be writing to the database file.
-RUN chown wagtail:wagtail /app
+RUN chown wagtail:wagtail /home/wagtail
 
 # Copy the source code of the project into the container.
 COPY --chown=wagtail:wagtail . .
@@ -45,6 +51,8 @@ COPY --chown=wagtail:wagtail . .
 # Use user "wagtail" to run the build commands below and the server itself.
 USER wagtail
 
+# nodejs
+RUN python manage.py install_node_dependencies
 # Collect static files.
 RUN python manage.py collectstatic --noinput --clear
 
