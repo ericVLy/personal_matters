@@ -23,6 +23,13 @@ if settings.DEBUG:
     # Serve static and media files from development server
     urlpatterns += staticfiles_urlpatterns()
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    from django.views import static
+    from django.urls import re_path
+    urlpatterns = urlpatterns + [
+        re_path(r'^static/(?P<path>.*)$', static.serve, {'document_root': settings.STATIC_ROOT}, name='static'),
+    ]
+
 
 urlpatterns = urlpatterns + [
     # For anything not caught by a more specific rule above, hand over to

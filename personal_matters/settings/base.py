@@ -28,6 +28,8 @@ INSTALLED_APPS = [
     "node_dependency_checker",
     "home",
     "search",
+    "wagtail_localize",
+    "wagtail_localize.locales",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.embeds",
@@ -125,7 +127,7 @@ STATICFILES_FINDERS = [
 ]
 
 STATICFILES_DIRS = [
-    os.path.join(PROJECT_DIR, "static"),
+    os.path.join(PROJECT_DIR, "static/"),
 ]
 
 # ManifestStaticFilesStorage is recommended in production, to prevent outdated

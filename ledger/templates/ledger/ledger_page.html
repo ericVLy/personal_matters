@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load wagtailimages_tags %}
+
+{% block content %}
+
+    {% include "base/include/header-ledger.html" %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="ledger__meta">
+                    {% comment %} {% if page.authors %}
+                        <div class="ledger__avatars">
+                            {% for author in page.authors %}
+                                <div class="ledger__author">{% picture author.image format-{avif,webp,jpeg} fill-50x50-c100 class="ledger__avatar" %}
+                                    {{ author.first_name }} {{ author.last_name }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %} {% endcomment %}
+                </div>
+
+                {{ page.transaction_time_start }}
+                {{ page.transaction_time_end }}
+
+                {% if page.get_tags %}
+                    <p class="ledger__tag-introduction">Find more ledger posts with similar tags</p>
+                    <div class="ledger-tags ledger-tags--condensed">
+                        <span class="u-sr-only">Filter ledger posts by tag</span>
+                        {% for tag in page.get_tags %}
+                            <a href="{{ tag.url }}" class="ledger-tags__pill">{{ tag }}</a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

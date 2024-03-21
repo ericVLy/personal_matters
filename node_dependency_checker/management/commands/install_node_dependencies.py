@@ -1,12 +1,17 @@
 # node_dependency_checker/management/commands/install_node_dependencies.py
 import os
 import subprocess
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 
 currentPath = os.path.split(os.path.realpath(__file__))[0]
 projectRootPath = os.path.abspath(os.path.join(currentPath, '..', '..', '..'))
-static_path = os.path.join(projectRootPath, 'personal_matters', 'static')
+
+if settings.DEBUG:
+    static_path = os.path.join(projectRootPath, 'personal_matters', 'static')
+else:
+    static_path = os.path.join(projectRootPath, "static/")
 
 
 class Command(BaseCommand):

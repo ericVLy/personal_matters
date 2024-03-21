@@ -50,7 +50,8 @@ USER wagtail
 #   PRACTICE. The database should be migrated manually or using the release
 #   phase facilities of your hosting platform. This is used only so the
 #   Wagtail instance can be started with a simple "docker run" command.
-CMD set -xe; python manage.py install_node_dependencies; \
+CMD set -xe; python manage.py collectstatic --noinput --clear; \
+python manage.py install_node_dependencies; \
 python manage.py makemigrations --noinput; \
 python manage.py migrate --noinput; \
 gunicorn personal_matters.wsgi:application
