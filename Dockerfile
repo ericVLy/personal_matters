@@ -1,8 +1,8 @@
 # Use an official Python runtime based on Debian 10 "buster" as a parent image.
-FROM python:3.8.1-slim-buster
+FROM python:3.11.8-alpine3.18
 
 # Add user that will be used in the container.
-RUN useradd wagtail -d /home/wagtail
+RUN addgroup -g 1000 -S wagtail && adduser wagtail -h /home/wagtail -D -G wagtail  -u 1000 -s /bin/sh 
 
 # Port used by this container to serve HTTP.
 EXPOSE 8000
@@ -15,18 +15,7 @@ ENV PYTHONUNBUFFERED=1 \
     PORT=8000
 
 # Install system packages required by Wagtail and Django.
-RUN apt-get update --yes --quiet &&  apt-get install --yes --quiet --no-install-recommends curl &&\
-curl -fsSL https://deb.nodesource.com/setup_21.x | bash - &&\
-apt-get install --yes --quiet --no-install-recommends \
-    nodejs\
-    build-essential \
-    libpq-dev \
-    libmariadbclient-dev \
-    libjpeg62-turbo-dev \
-    zlib1g-dev \
-    libwebp-dev \
-    git \
- && rm -rf /var/lib/apt/lists/*
+RUN apk update && apk upgrade && apk add  nodejs npm
 
 # Install the application server.
 RUN pip install "gunicorn==20.0.4"
@@ -49,8 +38,6 @@ COPY --chown=wagtail:wagtail . .
 # Use user "wagtail" to run the build commands below and the server itself.
 USER wagtail
 
-# nodejs
-RUN python manage.py install_node_dependencies
 # Collect static files.
 # RUN python manage.py collectstatic --noinput --clear
 
@@ -63,4 +50,7 @@ RUN python manage.py install_node_dependencies
 #   PRACTICE. The database should be migrated manually or using the release
 #   phase facilities of your hosting platform. This is used only so the
 #   Wagtail instance can be started with a simple "docker run" command.
-CMD set -xe; python manage.py migrate --noinput; gunicorn personal_matters.wsgi:application
+CMD set -xe; python manage.py install_node_dependencies; \
+python manage.py makemigrations --noinput; \
+python manage.py migrate --noinput; \
+gunicorn personal_matters.wsgi:application
