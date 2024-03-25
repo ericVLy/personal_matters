@@ -53,7 +53,8 @@ except ImportError:
                 'formatter': 'verbose',
                 "level": "INFO",
                 "class": "logging.FileHandler",
-                "filename": os.path.join(__log_path__, f"django_logfile_{datetime.now()}.log"),
+                "filename": os.path.join(__log_path__, 
+                                         f"django_logfile_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')[:23]}.log"),
             },
         },
         "loggers": {
